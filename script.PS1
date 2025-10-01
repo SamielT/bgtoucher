@@ -23,8 +23,8 @@ function Resolve-RawUrl {
         param([string]$Path)
         if (-not $Path) { return $null }
         if ($Path -match '^(https?|ftp)://') { return $Path }
-        # treat absolute/local paths as-is
-        if ($Path -match '^[a-zA-Z]:\\' -or $Path -like '/ *') { return $Path }
+        # treat absolute/local paths as-is (Windows drive letter or Unix-style /)
+        if ($Path -match '^[a-zA-Z]:\\' -or $Path.StartsWith('/')) { return $Path }
         return "https://raw.githubusercontent.com/$Repo/$Branch/$Path"
 }
 
@@ -78,11 +78,11 @@ if ($Image) {
                 }
         }
 } else {
-        $File = Get-ChildItem -Path $ScriptDir -File -Include *.jpg,*.jpeg,*.png,*.bmp | Select-Object -First 1
-        if (-not $File) {
-                Write-Host "No local image found in script directory ($ScriptDir). Attempting to download '$($ImagePath)'."
+                $File = Get-ChildItem -Path $ScriptDir -Include *.jpg,*.jpeg,*.png,*.bmp -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer } | Select-Object -First 1
+                if (-not $File) {
+                        $defaultImage = "rick.jpeg"
+                        Write-Host "No local image found in script directory ($ScriptDir). Attempting to download '$($defaultImage)'."
                 # If no local image, try to download the default repo image (rick.jpeg)
-                $defaultImage = "rick.jpeg"
                 $imgUrl = Resolve-RawUrl $defaultImage
                 $out = Join-Path -Path $env:TEMP -ChildPath (Split-Path -Leaf $imgUrl)
                 try {
