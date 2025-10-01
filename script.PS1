@@ -81,7 +81,6 @@ if ($Image) {
                 $File = Get-ChildItem -Path $ScriptDir -Include *.jpg,*.jpeg,*.png,*.bmp -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer } | Select-Object -First 1
                 if (-not $File) {
                         $defaultImage = "rick.jpeg"
-                        Write-Host "No local image found in script directory ($ScriptDir). Attempting to download '$($defaultImage)'."
                 # If no local image, try to download the default repo image (rick.jpeg)
                 $imgUrl = Resolve-RawUrl $defaultImage
                 $out = Join-Path -Path $env:TEMP -ChildPath (Split-Path -Leaf $imgUrl)
@@ -126,5 +125,3 @@ if (-not $result) {
         Write-Error "Failed to set wallpaper via SystemParametersInfo."
         exit 1
 }
-
-Write-Output "Wallpaper set to: $ImagePath"
